@@ -182,3 +182,11 @@ func (m MOS6510) DumpRegisters() string {
 
 	return buffer
 }
+
+func (m *MOS6510) setProcessorStatusBit(status ProcessorStatus, isSet bool) {
+	if isSet {
+		m.p = m.p | m.s
+	} else {
+		m.p = m.p & (0xff ^ m.s)
+	}
+}
