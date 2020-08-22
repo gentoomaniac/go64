@@ -1,6 +1,8 @@
 package mpu
 
-import "sync"
+import (
+	"fmt"
+)
 
 type ProcessorStatus int
 
@@ -88,8 +90,6 @@ type MOS6510 struct {
 	mode that enables access to any memory place without
 	having to use self-modifying code. */
 	y uint8
-
-	CycleLock sync.Mutex
 }
 
 // PC returns the value of the PC register
@@ -165,4 +165,13 @@ func (m MOS6510) Y() uint8 {
 // setY sets the value of the Y register
 func (m *MOS6510) setY(value uint8) {
 	m.y = value
+}
+
+//DumpRegisters returns a string with the curremnt register states
+func (m MOS6510) DumpRegisters() string {
+	buffer := ""
+	buffer += fmt.Sprintf("PC: 0x%04x\tPCL: 0x%02x\tPCH: 0x%02x\n", m.pc, m.PCL(), m.PCH())
+	buffer += fmt.Sprintf("S: 0x%02x\nP: 0x%02x\nA: 0x%02x\nX: 0x%02x\nY: 0x%02x\n", m.s, m.p, m.a, m.x, m.y)
+
+	return buffer
 }
