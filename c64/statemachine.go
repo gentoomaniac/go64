@@ -2,6 +2,8 @@ package c64
 
 import (
 	"fmt"
+	"io/ioutil"
+	"log"
 	"regexp"
 	"strings"
 
@@ -13,8 +15,17 @@ const (
 	MaxMemoryAddress uint16 = 0xffff
 )
 
+const (
+	LORAM  byte = 0x01
+	HIRAM       = 0x02
+	CHAREN      = 0x04
+)
+
 // C64 represents the internal state of the system
 type C64 struct {
+	KernalRom    []byte
+	BasicRom     []byte
+	CharacterRom []byte
 
 	// Memory represents the 64kB memory of the C64
 	Memory [int(MaxMemoryAddress) + 1]byte
@@ -32,11 +43,11 @@ func (c C64) DumpMemory(start uint16, end uint16) string {
 
 	for index := int(startAddr); index < int(end); index += bytesPerRow {
 		hexStrings := make([]string, 0)
-		for _, value := range c.Memory[index : index+bytesPerRow-1] {
+		for _, value := range c.Memory[index : index+bytesPerRow] {
 			hexStrings = append(hexStrings, fmt.Sprintf("%02x", value))
 		}
 
-		asText := string(c.Memory[index : index+bytesPerRow-1])
+		asText := string(c.Memory[index : index+bytesPerRow])
 		reNonPrintabel := regexp.MustCompile("[^[:graph:] ]")
 		asText = reNonPrintabel.ReplaceAllString(asText, ".")
 
@@ -44,4 +55,43 @@ func (c C64) DumpMemory(start uint16, end uint16) string {
 	}
 
 	return dump
+}
+
+func (c *C64) Init(basicRom string, kernalRom string, characterRom string) {
+	var err error
+	c.BasicRom, err = ioutil.ReadFile(basicRom)
+	if err != nil {
+		log.Panic(err)
+	}
+
+	c.KernalRom, err = ioutil.ReadFile(kernalRom)
+	if err != nil {
+		log.Panic(err)
+	}
+
+	c.CharacterRom, err = ioutil.ReadFile(characterRom)
+	if err != nil {
+		log.Panic(err)
+	}
+
+	c.Memory[0x00] = 0xff
+	c.Memory[0x01] = 0x07
+
+	c.updateMemoryBanks()
+}
+
+func (c *C64) updateMemoryBanks() {
+	// http://www.zimmers.net/anonftp/pub/cbm/maps/C64.MemoryMap
+	if c.Memory[0x01]&LORAM == 1 {
+		copy(c.Memory[0xa000:0xa000+len(c.BasicRom)], c.BasicRom)
+	}
+
+	if c.Memory[0x01]&HIRAM == 1 {
+		copy(c.Memory[0xe000:0xe000+len(c.KernalRom)], c.KernalRom)
+	}
+	if c.Memory[0x01]&CHAREN == 1 {
+		fmt.Println("ToDo: CHAREN is set, I/O should be mapped")
+	} else {
+		copy(c.Memory[0xd000:0xd000+len(c.CharacterRom)], c.CharacterRom)
+	}
 }
