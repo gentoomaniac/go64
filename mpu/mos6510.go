@@ -90,6 +90,8 @@ type MOS6510 struct {
 	mode that enables access to any memory place without
 	having to use self-modifying code. */
 	y uint8
+
+	Memory *[0x10000]byte
 }
 
 // PC returns the value of the PC register
@@ -97,13 +99,18 @@ func (m MOS6510) PC() uint16 {
 	return m.pc
 }
 
+// SetPC sets the value of the PC register
+func (m *MOS6510) SetPC(value uint16) {
+	m.pc = value
+}
+
 // PCH returns the value of the PCH register
 func (m MOS6510) PCH() uint8 {
 	return uint8(m.pc >> 8)
 }
 
-// setPCH sets the value of the PCH register
-func (m *MOS6510) setPCH(value uint8) {
+// SetPCH sets the value of the PCH register
+func (m *MOS6510) SetPCH(value uint8) {
 	m.pc = (uint16(value) << 8) | uint16(m.PCL())
 }
 
@@ -112,8 +119,8 @@ func (m MOS6510) PCL() uint8 {
 	return uint8(m.pc & 0x00ff)
 }
 
-// setPCH sets the value of the PCH register
-func (m *MOS6510) setPCL(value uint8) {
+// SetPCL sets the value of the PCL register
+func (m *MOS6510) SetPCL(value uint8) {
 	m.pc = (m.pc & 0xff00) | uint16(value)
 }
 
@@ -122,8 +129,8 @@ func (m MOS6510) S() uint8 {
 	return m.s
 }
 
-// setS sets the value of the S register
-func (m *MOS6510) setS(value uint8) {
+// SetS sets the value of the S register
+func (m *MOS6510) SetS(value uint8) {
 	m.s = value
 }
 
@@ -132,8 +139,8 @@ func (m MOS6510) P() uint8 {
 	return m.p
 }
 
-// setP sets the value of the P register
-func (m *MOS6510) setP(value uint8) {
+// SetP sets the value of the P register
+func (m *MOS6510) SetP(value uint8) {
 	m.p = value
 }
 
@@ -142,8 +149,8 @@ func (m MOS6510) A() uint8 {
 	return m.a
 }
 
-// setA sets the value of the A register
-func (m *MOS6510) setA(value uint8) {
+// SetA sets the value of the A register
+func (m *MOS6510) SetA(value uint8) {
 	m.a = value
 }
 
@@ -152,8 +159,8 @@ func (m MOS6510) X() uint8 {
 	return m.x
 }
 
-// setX sets the value of the X register
-func (m *MOS6510) setX(value uint8) {
+// SetX sets the value of the X register
+func (m *MOS6510) SetX(value uint8) {
 	m.x = value
 }
 
@@ -162,8 +169,8 @@ func (m MOS6510) Y() uint8 {
 	return m.y
 }
 
-// setY sets the value of the Y register
-func (m *MOS6510) setY(value uint8) {
+// SetY sets the value of the Y register
+func (m *MOS6510) SetY(value uint8) {
 	m.y = value
 }
 
