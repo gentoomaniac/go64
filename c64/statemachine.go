@@ -6,6 +6,7 @@ import (
 	"log"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/gentoomaniac/go64/mpu"
 )
@@ -31,7 +32,8 @@ type C64 struct {
 	Memory [int(MaxMemoryAddress) + 1]byte
 
 	// Mpu represents the MOS6510 of the C64
-	Mpu mpu.MOS6510
+	Mpu     mpu.MOS6510
+	mpuLock chan bool
 }
 
 // DumpMemory debug prints the memory in the given address range
@@ -57,6 +59,23 @@ func (c C64) DumpMemory(start uint16, end uint16) string {
 	return dump
 }
 
+func (c *C64) updateMemoryBanks() {
+	// http://www.zimmers.net/anonftp/pub/cbm/maps/C64.MemoryMap
+	if c.Memory[0x01]&LORAM == 1 {
+		copy(c.Memory[0xa000:0xa000+len(c.BasicRom)], c.BasicRom)
+	}
+
+	if c.Memory[0x01]&HIRAM == 1 {
+		copy(c.Memory[0xe000:0xe000+len(c.KernalRom)], c.KernalRom)
+	}
+	if c.Memory[0x01]&CHAREN == 1 {
+		fmt.Println("ToDo: CHAREN is set, I/O should be mapped")
+	} else {
+		copy(c.Memory[0xd000:0xd000+len(c.CharacterRom)], c.CharacterRom)
+	}
+}
+
+// Init initialises all components (loading roms, setting specific memory values etc)
 func (c *C64) Init(basicRom string, kernalRom string, characterRom string) {
 	var err error
 	c.BasicRom, err = ioutil.ReadFile(basicRom)
@@ -78,20 +97,22 @@ func (c *C64) Init(basicRom string, kernalRom string, characterRom string) {
 	c.Memory[0x01] = 0x07
 
 	c.updateMemoryBanks()
+	c.mpuLock = make(chan bool, 1)
 }
 
-func (c *C64) updateMemoryBanks() {
-	// http://www.zimmers.net/anonftp/pub/cbm/maps/C64.MemoryMap
-	if c.Memory[0x01]&LORAM == 1 {
-		copy(c.Memory[0xa000:0xa000+len(c.BasicRom)], c.BasicRom)
-	}
+// Run starts the simulation
+func (c *C64) Run() {
+	c.Mpu.Init(c.mpuLock)
+	fmt.Println(c.Mpu.DumpRegisters())
 
-	if c.Memory[0x01]&HIRAM == 1 {
-		copy(c.Memory[0xe000:0xe000+len(c.KernalRom)], c.KernalRom)
-	}
-	if c.Memory[0x01]&CHAREN == 1 {
-		fmt.Println("ToDo: CHAREN is set, I/O should be mapped")
-	} else {
-		copy(c.Memory[0xd000:0xd000+len(c.CharacterRom)], c.CharacterRom)
+	go c.Mpu.Run()
+
+	time.Sleep(100 * time.Millisecond)
+	for i := 0; i < 10; i++ {
+		fmt.Printf("Cycle #%02d\n", i)
+		c.mpuLock <- true
+		fmt.Println("... waiting for lock")
+		<-c.mpuLock
+		fmt.Println("Control back in main thread")
 	}
 }

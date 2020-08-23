@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/gentoomaniac/go64/c64"
 	"github.com/spf13/cobra"
 )
@@ -16,9 +14,7 @@ var runCmd = &cobra.Command{
 		system := &c64.C64{}
 
 		system.Init("rom/basic.rom", "rom/kernal.rom", "rom/character.rom")
-
-		fmt.Println(system.DumpMemory(0, c64.MaxMemoryAddress))
-		fmt.Println(system.Mpu.DumpRegisters())
+		system.Run()
 	},
 }
 

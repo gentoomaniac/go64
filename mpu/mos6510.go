@@ -51,7 +51,7 @@ type MOS6510 struct {
 	The Stack pointer can be read and written by transfering
 	its value to or from the index register X (see below) with
 	the TSX and TXS instructions. */
-	s uint8 //= 0xff;
+	s uint8
 
 	/*  Processor status
 
@@ -92,6 +92,9 @@ type MOS6510 struct {
 	y uint8
 
 	Memory *[0x10000]byte
+
+	cyckleLock chan bool
+	cycleCount int
 }
 
 // PC returns the value of the PC register
@@ -189,4 +192,43 @@ func (m *MOS6510) setProcessorStatusBit(status ProcessorStatus, isSet bool) {
 	} else {
 		m.p = m.p & (0xff ^ m.s)
 	}
+}
+
+// Init initialises the MPU
+func (m *MOS6510) Init(cyclelock chan bool) {
+	m.s = 0xff
+	m.cyckleLock = cyclelock
+}
+
+// Run starts the execution of the MPU
+func (m *MOS6510) Run() {
+	// https://www.pagetable.com/?p=410
+	// load reset vector
+	//m.pc = getWordFromMemory(0xfffc);
+	//log.Debug(string.Format("loading reset vector took {0} cycles", cycleLock.getCycleCount()));
+
+	for i := 0; i < 10; i++ {
+		fmt.Println("waiting for CPU cycle")
+
+		m.enterCycle()
+		fmt.Println("... within CPU cycle")
+		//opcodeMapper(getNextCodeByte())
+		m.exitCycle()
+		fmt.Println("exited CPU cycle")
+		fmt.Printf("CycleCount: %d\n", m.cycleCount)
+		m.resetCycleCount()
+	}
+}
+
+func (m *MOS6510) enterCycle() {
+	<-m.cyckleLock
+	m.cycleCount++
+}
+
+func (m *MOS6510) exitCycle() {
+	m.cyckleLock <- true
+}
+
+func (m *MOS6510) resetCycleCount() {
+	m.cycleCount = 0
 }
