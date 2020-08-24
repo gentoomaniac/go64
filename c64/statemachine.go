@@ -8,6 +8,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gentoomaniac/go64/cyclelock"
+
 	"github.com/gentoomaniac/go64/mpu"
 )
 
@@ -33,7 +35,7 @@ type C64 struct {
 
 	// Mpu represents the MOS6510 of the C64
 	Mpu     mpu.MOS6510
-	mpuLock chan bool
+	mpuLock cyclelock.CycleLock
 }
 
 // DumpMemory debug prints the memory in the given address range
@@ -97,22 +99,25 @@ func (c *C64) Init(basicRom string, kernalRom string, characterRom string) {
 	c.Memory[0x01] = 0x07
 
 	c.updateMemoryBanks()
-	c.mpuLock = make(chan bool, 1)
+
+	channelLock := &cyclelock.ChannelLock{}
+	channelLock.Init()
+	c.mpuLock = channelLock
+	c.Mpu.Init(c.mpuLock)
+
+	fmt.Println(c.Mpu.DumpRegisters())
 }
 
 // Run starts the simulation
 func (c *C64) Run() {
-	c.Mpu.Init(c.mpuLock)
-	fmt.Println(c.Mpu.DumpRegisters())
-
 	go c.Mpu.Run()
 
 	time.Sleep(100 * time.Millisecond)
 	for i := 0; i < 10; i++ {
-		fmt.Printf("Cycle #%02d\n", i)
-		c.mpuLock <- true
-		fmt.Println("... waiting for lock")
-		<-c.mpuLock
-		fmt.Println("Control back in main thread")
+		fmt.Printf("-- Cycle #%02d\n", i)
+		c.mpuLock.Unlock()
+		fmt.Println("-- ... waiting for lock")
+		c.mpuLock.WaitForLock()
+		fmt.Println("-- Control back in main thread")
 	}
 }

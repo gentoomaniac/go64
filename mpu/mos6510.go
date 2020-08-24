@@ -2,6 +2,8 @@ package mpu
 
 import (
 	"fmt"
+
+	"github.com/gentoomaniac/go64/cyclelock"
 )
 
 type ProcessorStatus int
@@ -93,8 +95,7 @@ type MOS6510 struct {
 
 	Memory *[0x10000]byte
 
-	cyckleLock chan bool
-	cycleCount int
+	cyckleLock cyclelock.CycleLock
 }
 
 // PC returns the value of the PC register
@@ -195,7 +196,7 @@ func (m *MOS6510) setProcessorStatusBit(status ProcessorStatus, isSet bool) {
 }
 
 // Init initialises the MPU
-func (m *MOS6510) Init(cyclelock chan bool) {
+func (m *MOS6510) Init(cyclelock cyclelock.CycleLock) {
 	m.s = 0xff
 	m.cyckleLock = cyclelock
 }
@@ -208,27 +209,15 @@ func (m *MOS6510) Run() {
 	//log.Debug(string.Format("loading reset vector took {0} cycles", cycleLock.getCycleCount()));
 
 	for i := 0; i < 10; i++ {
-		fmt.Println("waiting for CPU cycle")
+		fmt.Println("++ waiting for CPU cycle")
 
-		m.enterCycle()
-		fmt.Println("... within CPU cycle")
+		m.cyckleLock.EnterCycle()
+		fmt.Println("++ ... within CPU cycle")
 		//opcodeMapper(getNextCodeByte())
-		m.exitCycle()
-		fmt.Println("exited CPU cycle")
-		fmt.Printf("CycleCount: %d\n", m.cycleCount)
-		m.resetCycleCount()
+		m.cyckleLock.ExitCycle()
+
+		fmt.Println("++ exited CPU cycle")
+		fmt.Printf("++ CycleCount: %d\n", m.cyckleLock.CycleCount())
+		m.cyckleLock.ResetCycleCount()
 	}
-}
-
-func (m *MOS6510) enterCycle() {
-	<-m.cyckleLock
-	m.cycleCount++
-}
-
-func (m *MOS6510) exitCycle() {
-	m.cyckleLock <- true
-}
-
-func (m *MOS6510) resetCycleCount() {
-	m.cycleCount = 0
 }
