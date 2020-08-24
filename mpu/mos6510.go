@@ -226,6 +226,31 @@ func (m *MOS6510) getNextCodeByte() byte {
 	return b
 }
 
+func (m MOS6510) getWordFromMemory(lo uint16, hi uint16) uint16 {
+	word := uint16(m.Memory[hi]) << 8
+	return word | uint16(m.Memory[lo])
+}
+
+func (m *MOS6510) getWordFromMemoryByAddr(addr uint16, pageBoundry bool) uint16 {
+	// if we ignore page boundries or the second byte is still on the same page
+	if !pageBoundry || (addr%PageSize) < PageSize-1 {
+		return m.getWordFromMemory(addr, addr+1)
+		// otherwise take the pages 0x00 address for the high byte (see http://www.oxyron.de/html/opcodes02.html "The 6502 bugs")
+	} else {
+		return m.getWordFromMemory(addr, (addr/(PageSize-1))<<8)
+	}
+}
+
+func (m *MOS6510) getWordFromZeropage(addr byte) uint16 {
+	return m.getWordFromMemoryByAddr(uint16(addr), true)
+}
+
+func (m *MOS6510) getNextCodeWord() uint16 {
+	word := m.getWordFromMemory(m.pc, m.pc+1)
+	m.pc += 2
+	return word
+}
+
 // Run starts the execution of the MPU
 func (m *MOS6510) Run() {
 	// https://www.pagetable.com/?p=410
