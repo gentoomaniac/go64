@@ -79,6 +79,9 @@ func (c *C64) updateMemoryBanks() {
 
 // Init initialises all components (loading roms, setting specific memory values etc)
 func (c *C64) Init(basicRom string, kernalRom string, characterRom string) {
+	log.SetFlags(log.Lmicroseconds)
+	log.SetFlags(log.Lshortfile)
+
 	var err error
 	c.BasicRom, err = ioutil.ReadFile(basicRom)
 	if err != nil {
@@ -100,6 +103,8 @@ func (c *C64) Init(basicRom string, kernalRom string, characterRom string) {
 
 	c.updateMemoryBanks()
 
+	c.Mpu.Memory = &c.Memory
+
 	channelLock := &cyclelock.ChannelLock{}
 	channelLock.Init()
 	c.mpuLock = channelLock
@@ -113,11 +118,12 @@ func (c *C64) Run() {
 	go c.Mpu.Run()
 
 	time.Sleep(100 * time.Millisecond)
-	for i := 0; i < 10; i++ {
-		fmt.Printf("-- Cycle #%02d\n", i)
+	cycle := 0
+	for true {
+		fmt.Printf("-- Cycle #%02d\n", cycle)
 		c.mpuLock.Unlock()
-		fmt.Println("-- ... waiting for lock")
 		c.mpuLock.WaitForLock()
-		fmt.Println("-- Control back in main thread")
+		cycle++
+		time.Sleep(977 * time.Nanosecond)
 	}
 }
