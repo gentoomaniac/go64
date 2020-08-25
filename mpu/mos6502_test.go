@@ -166,8 +166,10 @@ func TestMemoryReads(t *testing.T) {
 			blankMemory[0x01ff] = hi
 
 			memory.Assert(MOS6502.getDWordFromMemoryByAddr(0x01fe, false)).Equal(value)
+			memory.Assert(MOS6502.CyckleLock.CycleCount()).Equal(2)
+			MOS6502.CyckleLock.ResetCycleCount()
 			memory.Assert(MOS6502.getDWordFromMemoryByAddr(0x01fe, true)).Equal(value)
-
+			memory.Assert(MOS6502.CyckleLock.CycleCount()).Equal(2)
 			MOS6502.CyckleLock.ResetCycleCount()
 		})
 
@@ -189,6 +191,7 @@ func TestMemoryReads(t *testing.T) {
 			blankMemory[0x0100] = hi
 
 			memory.Assert(MOS6502.getDWordFromMemoryByAddr(0x01ff, true)).Equal(value)
+			memory.Assert(MOS6502.CyckleLock.CycleCount()).Equal(2)
 
 			MOS6502.CyckleLock.ResetCycleCount()
 		})
@@ -211,8 +214,10 @@ func TestMemoryReads(t *testing.T) {
 			blankMemory[0x0000] = hi
 
 			memory.Assert(MOS6502.getDWordFromZeropage(uint8(0x00ff))).Equal(value)
+			memory.Assert(MOS6502.CyckleLock.CycleCount()).Equal(2)
 
 			MOS6502.CyckleLock.ResetCycleCount()
 		})
+
 	})
 }
