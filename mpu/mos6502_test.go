@@ -258,3 +258,34 @@ func TestMemoryReads(t *testing.T) {
 		})
 	})
 }
+
+func TestMemoryWrite(t *testing.T) {
+
+	rand.Seed(time.Now().UTC().UnixNano())
+
+	g := goblin.Goblin(t)
+	g.Describe("Test Memory Writes", func() {
+		g.It("write byte to memory", func() {
+			var blankMemory [0x10000]byte
+
+			var lock cyclelock.CycleLock
+			lock = &cyclelock.AlwaysOpenLock{}
+
+			MOS6502 := &MOS6502{}
+			MOS6502.Memory = &blankMemory
+			MOS6502.Init(lock)
+
+			for i := 0; i < RandomTestCount; i++ {
+				address := uint16(rand.Intn(0xffff))
+				value := byte(rand.Intn(0xff))
+
+				MOS6502.storeByteInMemory(address, value)
+
+				g.Assert(MOS6502.Memory[address]).Equal(value)
+				g.Assert(MOS6502.CyckleLock.CycleCount()).Equal(1)
+
+				MOS6502.CyckleLock.ResetCycleCount()
+			}
+		})
+	})
+}
