@@ -33,8 +33,8 @@ type C64 struct {
 	// Memory represents the 64kB memory of the C64
 	Memory [int(MaxMemoryAddress) + 1]byte
 
-	// Mpu represents the MOS6510 of the C64
-	Mpu     mpu.MOS6510
+	// Mpu represents the MOS6502 of the C64
+	Mpu     mpu.MOS6502
 	mpuLock cyclelock.CycleLock
 }
 
