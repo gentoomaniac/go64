@@ -27,8 +27,8 @@ const (
 	IRQVector   uint16 = 0xfffe
 )
 
-// MOS6510 is a struct representing the internal state of the MOS 6510 MPU
-type MOS6510 struct {
+// MOS6502 is a struct representing the internal state of the MOS 6510 MPU
+type MOS6502 struct {
 
 	/*  Program Counter
 
@@ -100,87 +100,87 @@ type MOS6510 struct {
 }
 
 // PC returns the value of the PC register
-func (m MOS6510) PC() uint16 {
+func (m MOS6502) PC() uint16 {
 	return m.pc
 }
 
 // SetPC sets the value of the PC register
-func (m *MOS6510) SetPC(value uint16) {
+func (m *MOS6502) SetPC(value uint16) {
 	m.pc = value
 }
 
 // PCH returns the value of the PCH register
-func (m MOS6510) PCH() uint8 {
+func (m MOS6502) PCH() uint8 {
 	return uint8(m.pc >> 8)
 }
 
 // SetPCH sets the value of the PCH register
-func (m *MOS6510) SetPCH(value uint8) {
+func (m *MOS6502) SetPCH(value uint8) {
 	m.pc = (uint16(value) << 8) | uint16(m.PCL())
 }
 
 // PCL returns the value of the PC register
-func (m MOS6510) PCL() uint8 {
+func (m MOS6502) PCL() uint8 {
 	return uint8(m.pc & 0x00ff)
 }
 
 // SetPCL sets the value of the PCL register
-func (m *MOS6510) SetPCL(value uint8) {
+func (m *MOS6502) SetPCL(value uint8) {
 	m.pc = (m.pc & 0xff00) | uint16(value)
 }
 
 // S returns the value of the S register
-func (m MOS6510) S() uint8 {
+func (m MOS6502) S() uint8 {
 	return m.s
 }
 
 // SetS sets the value of the S register
-func (m *MOS6510) SetS(value uint8) {
+func (m *MOS6502) SetS(value uint8) {
 	m.s = value
 }
 
 // P returns the value of the P register
-func (m MOS6510) P() uint8 {
+func (m MOS6502) P() uint8 {
 	return m.p
 }
 
 // SetP sets the value of the P register
-func (m *MOS6510) SetP(value uint8) {
+func (m *MOS6502) SetP(value uint8) {
 	m.p = value
 }
 
 // A returns the value of the A register
-func (m MOS6510) A() uint8 {
+func (m MOS6502) A() uint8 {
 	return m.a
 }
 
 // SetA sets the value of the A register
-func (m *MOS6510) SetA(value uint8) {
+func (m *MOS6502) SetA(value uint8) {
 	m.a = value
 }
 
 // X returns the value of the X register
-func (m MOS6510) X() uint8 {
+func (m MOS6502) X() uint8 {
 	return m.x
 }
 
 // SetX sets the value of the X register
-func (m *MOS6510) SetX(value uint8) {
+func (m *MOS6502) SetX(value uint8) {
 	m.x = value
 }
 
 // Y returns the value of the Y register
-func (m MOS6510) Y() uint8 {
+func (m MOS6502) Y() uint8 {
 	return m.y
 }
 
 // SetY sets the value of the Y register
-func (m *MOS6510) SetY(value uint8) {
+func (m *MOS6502) SetY(value uint8) {
 	m.y = value
 }
 
 //DumpRegisters returns a string with the curremnt register states
-func (m MOS6510) DumpRegisters() string {
+func (m MOS6502) DumpRegisters() string {
 	buffer := ""
 	buffer += fmt.Sprintf("PC: 0x%04x\tPCL: 0x%02x\tPCH: 0x%02x\n", m.pc, m.PCL(), m.PCH())
 	buffer += fmt.Sprintf("S: 0x%02x\nP: 0x%02x\nA: 0x%02x\nX: 0x%02x\nY: 0x%02x\n", m.s, m.p, m.a, m.x, m.y)
@@ -188,7 +188,7 @@ func (m MOS6510) DumpRegisters() string {
 	return buffer
 }
 
-func (m *MOS6510) setProcessorStatusBit(status ProcessorStatus, isSet bool) {
+func (m *MOS6502) setProcessorStatusBit(status ProcessorStatus, isSet bool) {
 	if isSet {
 		m.p = m.p | m.s
 	} else {
@@ -196,7 +196,7 @@ func (m *MOS6510) setProcessorStatusBit(status ProcessorStatus, isSet bool) {
 	}
 }
 
-func (m MOS6510) GetByteFromMemory(addr uint16) byte {
+func (m MOS6502) getByteFromMemory(addr uint16) byte {
 	m.CyckleLock.EnterCycle()
 	b := m.Memory[addr]
 	m.CyckleLock.ExitCycle()
@@ -205,49 +205,49 @@ func (m MOS6510) GetByteFromMemory(addr uint16) byte {
 	return b
 }
 
-func (m *MOS6510) storeByteInMemory(addr uint16, value byte) {
+func (m *MOS6502) storeByteInMemory(addr uint16, value byte) {
 	m.CyckleLock.EnterCycle()
 	m.Memory[addr] = value
 	m.CyckleLock.ExitCycle()
 	//log.Printf("Byte loaded from address 0x%04x: 0x%02x", addr, value)
 }
 
-func (m *MOS6510) GetNextCodeByte() byte {
-	b := m.GetByteFromMemory(m.pc)
+func (m *MOS6502) getNextCodeByte() byte {
+	b := m.getByteFromMemory(m.pc)
 	m.pc++
 	return b
 }
 
-func (m MOS6510) GetDWordFromMemory(hi uint16, lo uint16) uint16 {
-	word := uint16(m.GetByteFromMemory(hi)) << 8
-	result := word | uint16(m.GetByteFromMemory(lo))
+func (m MOS6502) getDWordFromMemory(hi uint16, lo uint16) uint16 {
+	word := uint16(m.getByteFromMemory(hi)) << 8
+	result := word | uint16(m.getByteFromMemory(lo))
 
 	//fmt.Printf("dword loaded from address 0x%02x: 0x%04x\n", lo, result)
 	return result
 }
 
-func (m *MOS6510) GetDWordFromMemoryByAddr(addr uint16, pageBoundry bool) uint16 {
+func (m *MOS6502) getDWordFromMemoryByAddr(addr uint16, pageBoundry bool) uint16 {
 	// if we ignore page boundries or the second byte is still on the same page
 	if !pageBoundry || (addr%PageSize) < PageSize-1 {
-		return m.GetDWordFromMemory(addr+1, addr)
+		return m.getDWordFromMemory(addr+1, addr)
 		// otherwise take the pages 0x??00 address for the high byte (see http://www.oxyron.de/html/opcodes02.html "The 6502 bugs")
 	} else {
-		return m.GetDWordFromMemory((addr/(PageSize))<<8, addr)
+		return m.getDWordFromMemory((addr/(PageSize))<<8, addr)
 	}
 }
 
-func (m *MOS6510) GetDWordFromZeropage(addr byte) uint16 {
-	return m.GetDWordFromMemoryByAddr(uint16(addr), true)
+func (m *MOS6502) getDWordFromZeropage(addr byte) uint16 {
+	return m.getDWordFromMemoryByAddr(uint16(addr), true)
 }
 
-func (m *MOS6510) GetNextCodeDWord() uint16 {
-	word := m.GetDWordFromMemory(m.pc, m.pc+1)
+func (m *MOS6502) getNextCodeDWord() uint16 {
+	word := m.getDWordFromMemory(m.pc, m.pc+1)
 	m.pc += 2
 	return word
 }
 
 // Init initialises the MPU
-func (m *MOS6510) Init(cyclelock cyclelock.CycleLock) {
+func (m *MOS6502) Init(cyclelock cyclelock.CycleLock) {
 	log.SetFlags(log.Lmicroseconds)
 	log.SetFlags(log.Lshortfile)
 	m.s = 0xff
@@ -255,14 +255,14 @@ func (m *MOS6510) Init(cyclelock cyclelock.CycleLock) {
 }
 
 // Run starts the execution of the MPU
-func (m *MOS6510) Run() {
+func (m *MOS6502) Run() {
 	// https://www.pagetable.com/?p=410
 	// load reset vector
 	//m.pc = getWordFromMemory(0xfffc);
 	//log.Debug(string.Format("loading reset vector took {0} cycles", cycleLock.getCycleCount()));
 
 	for i := 0; i <= 0xffff; i++ {
-		m.GetNextCodeByte()
+		m.getNextCodeByte()
 		//log.Printf("++ CycleCount: %d\n", m.cyckleLock.CycleCount())
 		m.CyckleLock.ResetCycleCount()
 	}
