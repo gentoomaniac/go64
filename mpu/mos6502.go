@@ -236,7 +236,7 @@ func (m *MOS6502) getDWordFromMemoryByAddr(addr uint16, pageBoundry bool) uint16
 	return m.getDWordFromMemory((addr/(PageSize))<<8, addr)
 }
 
-func (m *MOS6502) getDWordFromZeropage(addr byte) uint16 {
+func (m *MOS6502) getDWordFromZeropage(addr uint8) uint16 {
 	return m.getDWordFromMemoryByAddr(uint16(addr), true)
 }
 

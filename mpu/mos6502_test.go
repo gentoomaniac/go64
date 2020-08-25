@@ -192,5 +192,27 @@ func TestMemoryReads(t *testing.T) {
 
 			MOS6502.CyckleLock.ResetCycleCount()
 		})
+
+		memory.It("reads dword from zeropage with 6502 bug", func() {
+			var blankMemory [0x10000]byte
+
+			var lock cyclelock.CycleLock
+			lock = &cyclelock.AlwaysOpenLock{}
+
+			MOS6502 := &MOS6502{}
+			MOS6502.Memory = &blankMemory
+			MOS6502.Init(lock)
+
+			value := uint16(rand.Intn(0xffff))
+
+			hi := byte(value >> 8)
+			lo := byte(value & 0xff)
+			blankMemory[0x00ff] = lo
+			blankMemory[0x0000] = hi
+
+			memory.Assert(MOS6502.getDWordFromZeropage(uint8(0x00ff))).Equal(value)
+
+			MOS6502.CyckleLock.ResetCycleCount()
+		})
 	})
 }
