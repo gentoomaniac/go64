@@ -219,5 +219,42 @@ func TestMemoryReads(t *testing.T) {
 			MOS6502.CyckleLock.ResetCycleCount()
 		})
 
+		memory.It("getNextCodeByte increments PC register by one ", func() {
+			var blankMemory [0x10000]byte
+
+			var lock cyclelock.CycleLock
+			lock = &cyclelock.AlwaysOpenLock{}
+
+			MOS6502 := &MOS6502{}
+			MOS6502.Memory = &blankMemory
+			MOS6502.Init(lock)
+
+			oldPC := MOS6502.pc
+
+			MOS6502.getNextCodeByte()
+
+			memory.Assert(MOS6502.pc - oldPC).Equal(uint16(1))
+
+			MOS6502.CyckleLock.ResetCycleCount()
+		})
+
+		memory.It("getNextCodeDWord increments PC register by two ", func() {
+			var blankMemory [0x10000]byte
+
+			var lock cyclelock.CycleLock
+			lock = &cyclelock.AlwaysOpenLock{}
+
+			MOS6502 := &MOS6502{}
+			MOS6502.Memory = &blankMemory
+			MOS6502.Init(lock)
+
+			oldPC := MOS6502.pc
+
+			MOS6502.getNextCodeDWord()
+
+			memory.Assert(MOS6502.pc - oldPC).Equal(uint16(2))
+
+			MOS6502.CyckleLock.ResetCycleCount()
+		})
 	})
 }
