@@ -200,7 +200,7 @@ func (m MOS6502) getByteFromMemory(addr uint16) byte {
 	m.CyckleLock.EnterCycle()
 	b := m.Memory[addr]
 	m.CyckleLock.ExitCycle()
-	fmt.Printf("byte loaded from address 0x%04x: 0x%02x\n", addr, b)
+	//fmt.Printf("byte loaded from address 0x%04x: 0x%02x\n", addr, b)
 
 	return b
 }
