@@ -96,7 +96,7 @@ type MOS6510 struct {
 
 	Memory *[0x10000]byte
 
-	cyckleLock cyclelock.CycleLock
+	CyckleLock cyclelock.CycleLock
 }
 
 // PC returns the value of the PC register
@@ -196,59 +196,62 @@ func (m *MOS6510) setProcessorStatusBit(status ProcessorStatus, isSet bool) {
 	}
 }
 
-// Init initialises the MPU
-func (m *MOS6510) Init(cyclelock cyclelock.CycleLock) {
-	log.SetFlags(log.Lmicroseconds)
-	log.SetFlags(log.Lshortfile)
-	m.s = 0xff
-	m.cyckleLock = cyclelock
-}
-
-func (m MOS6510) getByteFromMemory(addr uint16) byte {
-	m.cyckleLock.EnterCycle()
+func (m MOS6510) GetByteFromMemory(addr uint16) byte {
+	m.CyckleLock.EnterCycle()
 	b := m.Memory[addr]
-	m.cyckleLock.ExitCycle()
-	fmt.Printf("Byte loaded from address 0x%02x: 0x%02x\n", addr, b)
+	m.CyckleLock.ExitCycle()
+	fmt.Printf("byte loaded from address 0x%04x: 0x%02x\n", addr, b)
 
 	return b
 }
 
 func (m *MOS6510) storeByteInMemory(addr uint16, value byte) {
-	m.cyckleLock.EnterCycle()
+	m.CyckleLock.EnterCycle()
 	m.Memory[addr] = value
-	m.cyckleLock.ExitCycle()
-	//log.Printf("Byte loaded from address 0x%02x: 0x%02x", addr, value)
+	m.CyckleLock.ExitCycle()
+	//log.Printf("Byte loaded from address 0x%04x: 0x%02x", addr, value)
 }
 
-func (m *MOS6510) getNextCodeByte() byte {
-	b := m.getByteFromMemory(m.pc)
+func (m *MOS6510) GetNextCodeByte() byte {
+	b := m.GetByteFromMemory(m.pc)
 	m.pc++
 	return b
 }
 
-func (m MOS6510) getWordFromMemory(lo uint16, hi uint16) uint16 {
-	word := uint16(m.Memory[hi]) << 8
-	return word | uint16(m.Memory[lo])
+func (m MOS6510) GetDWordFromMemory(hi uint16, lo uint16) uint16 {
+	word := uint16(m.GetByteFromMemory(hi)) << 8
+	result := word | uint16(m.GetByteFromMemory(lo))
+
+	//fmt.Printf("dword loaded from address 0x%02x: 0x%04x\n", lo, result)
+	return result
 }
 
-func (m *MOS6510) getWordFromMemoryByAddr(addr uint16, pageBoundry bool) uint16 {
+func (m *MOS6510) GetDWordFromMemoryByAddr(addr uint16, pageBoundry bool) uint16 {
 	// if we ignore page boundries or the second byte is still on the same page
 	if !pageBoundry || (addr%PageSize) < PageSize-1 {
-		return m.getWordFromMemory(addr, addr+1)
-		// otherwise take the pages 0x00 address for the high byte (see http://www.oxyron.de/html/opcodes02.html "The 6502 bugs")
+		return m.GetDWordFromMemory(addr+1, addr)
+		// otherwise take the pages 0x??00 address for the high byte (see http://www.oxyron.de/html/opcodes02.html "The 6502 bugs")
 	} else {
-		return m.getWordFromMemory(addr, (addr/(PageSize-1))<<8)
+		return m.GetDWordFromMemory((addr/(PageSize))<<8, addr)
 	}
 }
 
-func (m *MOS6510) getWordFromZeropage(addr byte) uint16 {
-	return m.getWordFromMemoryByAddr(uint16(addr), true)
+func (m *MOS6510) GetDWordFromZeropage(addr byte) uint16 {
+	return m.GetDWordFromMemoryByAddr(uint16(addr), true)
 }
 
-func (m *MOS6510) getNextCodeWord() uint16 {
-	word := m.getWordFromMemory(m.pc, m.pc+1)
+func (m *MOS6510) GetNextCodeDWord() uint16 {
+	word := m.GetDWordFromMemory(m.pc, m.pc+1)
 	m.pc += 2
 	return word
+}
+
+// Init initialises the MPU
+func (m *MOS6510) Init(cyclelock cyclelock.CycleLock) {
+	log.SetFlags(log.Lmicroseconds)
+	log.SetFlags(log.Lshortfile)
+	m.s = 0xff
+	m.CyckleLock = cyclelock
 }
 
 // Run starts the execution of the MPU
@@ -259,8 +262,8 @@ func (m *MOS6510) Run() {
 	//log.Debug(string.Format("loading reset vector took {0} cycles", cycleLock.getCycleCount()));
 
 	for i := 0; i <= 0xffff; i++ {
-		m.getNextCodeByte()
+		m.GetNextCodeByte()
 		//log.Printf("++ CycleCount: %d\n", m.cyckleLock.CycleCount())
-		m.cyckleLock.ResetCycleCount()
+		m.CyckleLock.ResetCycleCount()
 	}
 }
