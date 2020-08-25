@@ -231,9 +231,9 @@ func (m *MOS6502) getDWordFromMemoryByAddr(addr uint16, pageBoundry bool) uint16
 	if !pageBoundry || (addr%PageSize) < PageSize-1 {
 		return m.getDWordFromMemory(addr+1, addr)
 		// otherwise take the pages 0x??00 address for the high byte (see http://www.oxyron.de/html/opcodes02.html "The 6502 bugs")
-	} else {
-		return m.getDWordFromMemory((addr/(PageSize))<<8, addr)
 	}
+
+	return m.getDWordFromMemory((addr/(PageSize))<<8, addr)
 }
 
 func (m *MOS6502) getDWordFromZeropage(addr byte) uint16 {
