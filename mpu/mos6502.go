@@ -256,7 +256,7 @@ func (m MOS6502) impliedAdressing(addr uint16) uint16 { return 0 }
 
 // addressing, supported by bit-shifting instructions, turns the "action" of the operation towards the accumulator.
 //ToDo:
-func (m MOS6502) accumulatorAdressing() uint16 { return 0 }
+func (m MOS6502) accumulatorAdressing() uint8 { return m.a }
 
 func (m MOS6502) absoluteAdressing(addr uint16) uint16 { return addr }
 
