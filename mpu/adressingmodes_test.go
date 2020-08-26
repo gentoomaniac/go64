@@ -29,9 +29,9 @@ func TestAdressingModes(t *testing.T) {
 				address := uint16(rand.Intn(0xffff))
 
 				g.Assert(MOS6502.impliedAdressing(address)).Equal(uint16(0))
-				g.Assert(MOS6502.CyckleLock.CycleCount()).Equal(0)
+				g.Assert(MOS6502.CycleLock.CycleCount()).Equal(0)
 
-				MOS6502.CyckleLock.ResetCycleCount()
+				MOS6502.CycleLock.ResetCycleCount()
 			}
 		})
 
@@ -49,9 +49,9 @@ func TestAdressingModes(t *testing.T) {
 				MOS6502.a = uint8(rand.Intn(0xff))
 
 				g.Assert(MOS6502.accumulatorAdressing()).Equal(MOS6502.a)
-				g.Assert(MOS6502.CyckleLock.CycleCount()).Equal(0)
+				g.Assert(MOS6502.CycleLock.CycleCount()).Equal(0)
 
-				MOS6502.CyckleLock.ResetCycleCount()
+				MOS6502.CycleLock.ResetCycleCount()
 			}
 		})
 
@@ -69,9 +69,9 @@ func TestAdressingModes(t *testing.T) {
 				address := uint16(rand.Intn(0xffff))
 
 				g.Assert(MOS6502.absoluteAdressing(address)).Equal(address)
-				g.Assert(MOS6502.CyckleLock.CycleCount()).Equal(0)
+				g.Assert(MOS6502.CycleLock.CycleCount()).Equal(0)
 
-				MOS6502.CyckleLock.ResetCycleCount()
+				MOS6502.CycleLock.ResetCycleCount()
 			}
 		})
 
@@ -90,9 +90,9 @@ func TestAdressingModes(t *testing.T) {
 				offset := uint8(rand.Intn(0xff))
 
 				g.Assert(MOS6502.indexedAdressing(address, offset)).Equal(address + uint16(offset))
-				g.Assert(MOS6502.CyckleLock.CycleCount()).Equal(0)
+				g.Assert(MOS6502.CycleLock.CycleCount()).Equal(0)
 
-				MOS6502.CyckleLock.ResetCycleCount()
+				MOS6502.CycleLock.ResetCycleCount()
 			}
 		})
 
@@ -110,9 +110,9 @@ func TestAdressingModes(t *testing.T) {
 				address := uint8(rand.Intn(0xff))
 
 				g.Assert(MOS6502.zeropageAdressing(address)).Equal(uint16(address))
-				g.Assert(MOS6502.CyckleLock.CycleCount()).Equal(0)
+				g.Assert(MOS6502.CycleLock.CycleCount()).Equal(0)
 
-				MOS6502.CyckleLock.ResetCycleCount()
+				MOS6502.CycleLock.ResetCycleCount()
 			}
 		})
 
@@ -131,9 +131,9 @@ func TestAdressingModes(t *testing.T) {
 				offset := uint8(rand.Intn(0xff))
 
 				g.Assert(MOS6502.zeropageIndexedAdressing(address, offset)).Equal(uint16(address + offset))
-				g.Assert(MOS6502.CyckleLock.CycleCount()).Equal(0)
+				g.Assert(MOS6502.CycleLock.CycleCount()).Equal(0)
 
-				MOS6502.CyckleLock.ResetCycleCount()
+				MOS6502.CycleLock.ResetCycleCount()
 			}
 		})
 
@@ -152,9 +152,9 @@ func TestAdressingModes(t *testing.T) {
 				offset := uint8(rand.Intn(0xff))
 
 				g.Assert(MOS6502.relativeAdressing(address, offset)).Equal(address + uint16(offset))
-				g.Assert(MOS6502.CyckleLock.CycleCount()).Equal(0)
+				g.Assert(MOS6502.CycleLock.CycleCount()).Equal(0)
 
-				MOS6502.CyckleLock.ResetCycleCount()
+				MOS6502.CycleLock.ResetCycleCount()
 			}
 		})
 
@@ -176,9 +176,9 @@ func TestAdressingModes(t *testing.T) {
 				blankMemory[address] = byte(targetAddress & 0xff)
 
 				g.Assert(MOS6502.absoluteIndirectAdressing(address)).Equal(targetAddress)
-				g.Assert(MOS6502.CyckleLock.CycleCount()).Equal(2)
+				g.Assert(MOS6502.CycleLock.CycleCount()).Equal(2)
 
-				MOS6502.CyckleLock.ResetCycleCount()
+				MOS6502.CycleLock.ResetCycleCount()
 			}
 		})
 
@@ -202,9 +202,9 @@ func TestAdressingModes(t *testing.T) {
 				blankMemory[address+MOS6502.x] = byte(targetAddress & 0xff)
 
 				g.Assert(MOS6502.indexedIndirectAdressing(address)).Equal(targetAddress)
-				g.Assert(MOS6502.CyckleLock.CycleCount()).Equal(2)
+				g.Assert(MOS6502.CycleLock.CycleCount()).Equal(2)
 
-				MOS6502.CyckleLock.ResetCycleCount()
+				MOS6502.CycleLock.ResetCycleCount()
 			}
 		})
 
@@ -232,9 +232,9 @@ func TestAdressingModes(t *testing.T) {
 				blankMemory[intermediateAddress+uint16(MOS6502.y)] = byte(targetAddress & 0xff)
 
 				g.Assert(MOS6502.indirectIndexedAdressing(address, false)).Equal(targetAddress)
-				g.Assert(MOS6502.CyckleLock.CycleCount()).Equal(4)
+				g.Assert(MOS6502.CycleLock.CycleCount()).Equal(4)
 
-				MOS6502.CyckleLock.ResetCycleCount()
+				MOS6502.CycleLock.ResetCycleCount()
 			}
 		})
 	})

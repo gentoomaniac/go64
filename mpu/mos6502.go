@@ -96,7 +96,7 @@ type MOS6502 struct {
 
 	Memory *[0x10000]byte
 
-	CyckleLock cyclelock.CycleLock
+	CycleLock cyclelock.CycleLock
 }
 
 // PC returns the value of the PC register
@@ -188,6 +188,8 @@ func (m MOS6502) DumpRegisters() string {
 	return buffer
 }
 
+/* Memory Access */
+
 func (m *MOS6502) setProcessorStatusBit(status ProcessorStatus, isSet bool) {
 	if isSet {
 		m.p = m.p | m.s
@@ -196,31 +198,39 @@ func (m *MOS6502) setProcessorStatusBit(status ProcessorStatus, isSet bool) {
 	}
 }
 
-func (m MOS6502) getByteFromMemory(addr uint16) byte {
-	m.CyckleLock.EnterCycle()
+func (m MOS6502) getByteFromMemory(addr uint16, lockToCycle bool) byte {
+	if lockToCycle {
+		m.CycleLock.EnterCycle()
+	}
 	b := m.Memory[addr]
-	m.CyckleLock.ExitCycle()
+	if lockToCycle {
+		m.CycleLock.ExitCycle()
+	}
 	//fmt.Printf("byte loaded from address 0x%04x: 0x%02x\n", addr, b)
 
 	return b
 }
 
-func (m *MOS6502) storeByteInMemory(addr uint16, value byte) {
-	m.CyckleLock.EnterCycle()
+func (m *MOS6502) storeByteInMemory(addr uint16, value byte, lockToCycle bool) {
+	if lockToCycle {
+		m.CycleLock.EnterCycle()
+	}
 	m.Memory[addr] = value
-	m.CyckleLock.ExitCycle()
+	if lockToCycle {
+		m.CycleLock.ExitCycle()
+	}
 	//log.Printf("Byte loaded from address 0x%04x: 0x%02x", addr, value)
 }
 
 func (m *MOS6502) getNextCodeByte() byte {
-	b := m.getByteFromMemory(m.pc)
+	b := m.getByteFromMemory(m.pc, true)
 	m.pc++
 	return b
 }
 
 func (m MOS6502) getDWordFromMemory(hi uint16, lo uint16) uint16 {
-	word := uint16(m.getByteFromMemory(hi)) << 8
-	result := word | uint16(m.getByteFromMemory(lo))
+	word := uint16(m.getByteFromMemory(hi, true)) << 8
+	result := word | uint16(m.getByteFromMemory(lo, true))
 
 	//fmt.Printf("dword loaded from address 0x%02x: 0x%04x\n", lo, result)
 	return result
@@ -295,12 +305,25 @@ func (m *MOS6502) indirectIndexedZeropageAdressing(addr uint8) uint8 {
 	return (byte)(m.indirectIndexedAdressing(uint16(addr), true))
 }
 
+/* HELPERS */
+// Save byte to stack
+func (m *MOS6502) push(value byte, lockToCycle bool) {
+	if lockToCycle {
+		m.CycleLock.EnterCycle()
+	}
+	m.storeByteInMemory(StackOffset+uint16(m.s), value, false)
+	m.s--
+	if lockToCycle {
+		m.CycleLock.ExitCycle()
+	}
+}
+
 // Init initialises the MPU
 func (m *MOS6502) Init(cyclelock cyclelock.CycleLock) {
 	log.SetFlags(log.Lmicroseconds)
 	log.SetFlags(log.Lshortfile)
 	m.s = 0xff
-	m.CyckleLock = cyclelock
+	m.CycleLock = cyclelock
 }
 
 // Run starts the execution of the MPU
@@ -313,6 +336,6 @@ func (m *MOS6502) Run() {
 	for i := 0; i <= 0xffff; i++ {
 		m.getNextCodeByte()
 		//log.Printf("++ CycleCount: %d\n", m.cyckleLock.CycleCount())
-		m.CyckleLock.ResetCycleCount()
+		m.CycleLock.ResetCycleCount()
 	}
 }

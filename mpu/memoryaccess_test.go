@@ -31,10 +31,10 @@ func TestMemoryReads(t *testing.T) {
 
 				blankMemory[address] = value
 
-				memory.Assert(MOS6502.getByteFromMemory(address)).Equal(value)
-				memory.Assert(MOS6502.CyckleLock.CycleCount()).Equal(1)
+				memory.Assert(MOS6502.getByteFromMemory(address, true)).Equal(value)
+				memory.Assert(MOS6502.CycleLock.CycleCount()).Equal(1)
 
-				MOS6502.CyckleLock.ResetCycleCount()
+				MOS6502.CycleLock.ResetCycleCount()
 			}
 		})
 
@@ -58,9 +58,9 @@ func TestMemoryReads(t *testing.T) {
 				blankMemory[address+1] = hi
 
 				memory.Assert(MOS6502.getDWordFromMemory(address+1, address)).Equal(value)
-				memory.Assert(MOS6502.CyckleLock.CycleCount()).Equal(2)
+				memory.Assert(MOS6502.CycleLock.CycleCount()).Equal(2)
 
-				MOS6502.CyckleLock.ResetCycleCount()
+				MOS6502.CycleLock.ResetCycleCount()
 			}
 		})
 
@@ -82,11 +82,11 @@ func TestMemoryReads(t *testing.T) {
 			blankMemory[0x01ff] = hi
 
 			memory.Assert(MOS6502.getDWordFromMemoryByAddr(0x01fe, false)).Equal(value)
-			memory.Assert(MOS6502.CyckleLock.CycleCount()).Equal(2)
-			MOS6502.CyckleLock.ResetCycleCount()
+			memory.Assert(MOS6502.CycleLock.CycleCount()).Equal(2)
+			MOS6502.CycleLock.ResetCycleCount()
 			memory.Assert(MOS6502.getDWordFromMemoryByAddr(0x01fe, true)).Equal(value)
-			memory.Assert(MOS6502.CyckleLock.CycleCount()).Equal(2)
-			MOS6502.CyckleLock.ResetCycleCount()
+			memory.Assert(MOS6502.CycleLock.CycleCount()).Equal(2)
+			MOS6502.CycleLock.ResetCycleCount()
 		})
 
 		memory.It("reads dword with 6502 bug when crossing page boundary", func() {
@@ -107,9 +107,9 @@ func TestMemoryReads(t *testing.T) {
 			blankMemory[0x0100] = hi
 
 			memory.Assert(MOS6502.getDWordFromMemoryByAddr(0x01ff, true)).Equal(value)
-			memory.Assert(MOS6502.CyckleLock.CycleCount()).Equal(2)
+			memory.Assert(MOS6502.CycleLock.CycleCount()).Equal(2)
 
-			MOS6502.CyckleLock.ResetCycleCount()
+			MOS6502.CycleLock.ResetCycleCount()
 		})
 
 		memory.It("reads dword from zeropage with 6502 bug", func() {
@@ -130,9 +130,9 @@ func TestMemoryReads(t *testing.T) {
 			blankMemory[0x0000] = hi
 
 			memory.Assert(MOS6502.getDWordFromZeropage(uint8(0x00ff))).Equal(value)
-			memory.Assert(MOS6502.CyckleLock.CycleCount()).Equal(2)
+			memory.Assert(MOS6502.CycleLock.CycleCount()).Equal(2)
 
-			MOS6502.CyckleLock.ResetCycleCount()
+			MOS6502.CycleLock.ResetCycleCount()
 		})
 
 		memory.It("getNextCodeByte increments PC register by one ", func() {
@@ -151,7 +151,7 @@ func TestMemoryReads(t *testing.T) {
 
 			memory.Assert(MOS6502.pc - oldPC).Equal(uint16(1))
 
-			MOS6502.CyckleLock.ResetCycleCount()
+			MOS6502.CycleLock.ResetCycleCount()
 		})
 
 		memory.It("getNextCodeDWord increments PC register by two ", func() {
@@ -170,7 +170,7 @@ func TestMemoryReads(t *testing.T) {
 
 			memory.Assert(MOS6502.pc - oldPC).Equal(uint16(2))
 
-			MOS6502.CyckleLock.ResetCycleCount()
+			MOS6502.CycleLock.ResetCycleCount()
 		})
 	})
 }
@@ -195,12 +195,12 @@ func TestMemoryWrite(t *testing.T) {
 				address := uint16(rand.Intn(0xffff))
 				value := byte(rand.Intn(0xff))
 
-				MOS6502.storeByteInMemory(address, value)
+				MOS6502.storeByteInMemory(address, value, true)
 
 				g.Assert(MOS6502.Memory[address]).Equal(value)
-				g.Assert(MOS6502.CyckleLock.CycleCount()).Equal(1)
+				g.Assert(MOS6502.CycleLock.CycleCount()).Equal(1)
 
-				MOS6502.CyckleLock.ResetCycleCount()
+				MOS6502.CycleLock.ResetCycleCount()
 			}
 		})
 	})
