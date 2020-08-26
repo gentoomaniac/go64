@@ -247,6 +247,8 @@ func (m *MOS6502) getNextCodeDWord() uint16 {
 }
 
 /* Methods to resolve different adressing modes */
+// http://www.emulator101.com/6502-addressing-modes.html
+// http://www.obelisk.me.uk/6502/addressing.html#:~:text=Indexed%20indirect%20addressing%20is%20normally,byte%20of%20the%20target%20address.
 
 // ToDo: The 6502 bugs
 // addressing, which is rather a "no addressing mode at all"-option: Instructions which do not address an arbitrary memory location only supports this mode.
