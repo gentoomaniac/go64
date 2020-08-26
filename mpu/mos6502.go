@@ -318,6 +318,19 @@ func (m *MOS6502) push(value byte, lockToCycle bool) {
 	}
 }
 
+func (m *MOS6502) pop(lockToCycle bool) byte {
+	if lockToCycle {
+		m.CycleLock.EnterCycle()
+	}
+	m.s++
+	value := m.getByteFromMemory(StackOffset+uint16(m.s), false)
+	if lockToCycle {
+		m.CycleLock.ExitCycle()
+	}
+
+	return value
+}
+
 // Init initialises the MPU
 func (m *MOS6502) Init(cyclelock cyclelock.CycleLock) {
 	log.SetFlags(log.Lmicroseconds)
