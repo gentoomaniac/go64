@@ -246,6 +246,53 @@ func (m *MOS6502) getNextCodeDWord() uint16 {
 	return word
 }
 
+/* Methods to resolve different adressing modes */
+
+// ToDo: The 6502 bugs
+// addressing, which is rather a "no addressing mode at all"-option: Instructions which do not address an arbitrary memory location only supports this mode.
+func (m MOS6502) impliedAdressing(addr uint16) uint16 { return 0 }
+
+// addressing, supported by bit-shifting instructions, turns the "action" of the operation towards the accumulator.
+//ToDo:
+func (m MOS6502) accumulatorAdressing() uint16 { return 0 }
+
+func (m MOS6502) absoluteAdressing(addr uint16) uint16 { return addr }
+
+// absolute addressing, indexed by either the X and Y index registers: These adds the index register to a base address, forming the final "destination" for the operation.
+func (m MOS6502) indexedAdressing(addr uint16, offset uint8) uint16 { return addr + uint16(offset) }
+
+// addressing, which is similar to absolute addressing, but only works on addresses within the zeropage.
+func (m MOS6502) zeropageAdressing(addr uint8) uint16 { return uint16(addr) }
+
+// Effective address is zero page address plus the contents of the given register (X, or Y).
+func (m MOS6502) zeropageIndexedAdressing(addr uint8, offset uint8) uint16 {
+	return uint16(addr + offset)
+}
+
+// addressing, which uses a single byte to specify the destination of conditional branches ("jumps") within 128 bytes of where the branching instruction resides.
+func (m MOS6502) relativeAdressing(addr uint16, offset byte) uint16 { return addr + uint16(offset) }
+
+// addressing, which takes the content of a vector as its destination address.
+func (m *MOS6502) absoluteIndirectAdressing(addr uint16) uint16 {
+	return m.getDWordFromMemoryByAddr(addr, false)
+}
+
+// addressing, which uses the X index register to select one of a range of vectors in zeropage and takes the address from that pointer. Extremely rarely used!
+func (m *MOS6502) indexedIndirectAdressing(addr uint8) uint16 {
+	return m.getDWordFromZeropage(uint8(addr + X))
+}
+
+// addressing, which adds the Y index register to the contents of a pointer to obtain the address. Very flexible instruction found in anything but the most trivial machine language routines!
+func (m *MOS6502) indirectIndexedAdressing(addr uint16, pageBoundry bool) uint16 {
+	return m.getDWordFromMemoryByAddr(
+		m.getDWordFromMemoryByAddr(addr, pageBoundry)+uint16(m.y),
+		pageBoundry)
+}
+
+func (m *MOS6502) indirectIndexedZeropageAdressing(addr uint8) uint8 {
+	return (byte)(m.indirectIndexedAdressing(uint16(addr), true))
+}
+
 // Init initialises the MPU
 func (m *MOS6502) Init(cyclelock cyclelock.CycleLock) {
 	log.SetFlags(log.Lmicroseconds)
