@@ -281,7 +281,7 @@ func (m *MOS6502) absoluteIndirectAdressing(addr uint16) uint16 {
 
 // addressing, which uses the X index register to select one of a range of vectors in zeropage and takes the address from that pointer. Extremely rarely used!
 func (m *MOS6502) indexedIndirectAdressing(addr uint8) uint16 {
-	return m.getDWordFromZeropage(uint8(addr + X))
+	return m.getDWordFromZeropage(uint8(addr + m.x))
 }
 
 // addressing, which adds the Y index register to the contents of a pointer to obtain the address. Very flexible instruction found in anything but the most trivial machine language routines!
