@@ -7,7 +7,7 @@ import (
 	"github.com/gentoomaniac/go64/cyclelock"
 )
 
-type ProcessorStatus int
+type ProcessorStatus uint8
 
 const (
 	N ProcessorStatus = 0x80 // Negative
@@ -190,11 +190,11 @@ func (m MOS6502) DumpRegisters() string {
 
 /* Memory Access */
 
-func (m *MOS6502) setProcessorStatusBit(status ProcessorStatus, isSet bool) {
+func (m *MOS6502) setProcessorStatusBit(s ProcessorStatus, isSet bool) {
 	if isSet {
-		m.p = m.p | m.s
+		m.p = m.p | uint8(s)
 	} else {
-		m.p = m.p & (0xff ^ m.s)
+		m.p = m.p & uint8(0xff^s)
 	}
 }
 
@@ -329,6 +329,15 @@ func (m *MOS6502) pop(lockToCycle bool) byte {
 	}
 
 	return value
+}
+
+func checkForOverflow(vOld byte, vNew byte) bool {
+	if (vOld&0x80) == 0 && (vNew&0x80) != 0 {
+		return true
+	} else if (vOld&0x80) != 0 && (vNew&0x80) == 0 {
+		return true
+	}
+	return false
 }
 
 // Init initialises the MPU

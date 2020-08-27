@@ -88,5 +88,39 @@ func TestMOS6502Registers(t *testing.T) {
 				g.Assert(MOS6502.PC()).Equal(uint16(pcValue))
 			}
 		})
+
+		g.It("setting processor status bits", func() {
+			var blankMemory [0x10000]byte
+
+			MOS6502 := &MOS6502{}
+			MOS6502.Memory = &blankMemory
+
+			MOS6502.p = 0
+
+			MOS6502.setProcessorStatusBit(N, true)
+			g.Assert(MOS6502.p).Equal(uint8(N))
+			MOS6502.setProcessorStatusBit(N, false)
+			g.Assert(MOS6502.p).Equal(uint8(0))
+
+			MOS6502.setProcessorStatusBit(B, true)
+			g.Assert(MOS6502.p).Equal(uint8(B))
+			MOS6502.setProcessorStatusBit(B, false)
+			g.Assert(MOS6502.p).Equal(uint8(0))
+
+			MOS6502.setProcessorStatusBit(C, true)
+			g.Assert(MOS6502.p).Equal(uint8(C))
+			MOS6502.setProcessorStatusBit(C, false)
+			g.Assert(MOS6502.p).Equal(uint8(0))
+
+			MOS6502.setProcessorStatusBit(N, true)
+			MOS6502.setProcessorStatusBit(V, true)
+			MOS6502.setProcessorStatusBit(X, true)
+			MOS6502.setProcessorStatusBit(B, true)
+			MOS6502.setProcessorStatusBit(D, true)
+			MOS6502.setProcessorStatusBit(I, true)
+			MOS6502.setProcessorStatusBit(Z, true)
+			MOS6502.setProcessorStatusBit(C, true)
+			g.Assert(MOS6502.p).Equal(uint8(0xff))
+		})
 	})
 }
