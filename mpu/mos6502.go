@@ -198,6 +198,13 @@ func (m *MOS6502) setProcessorStatusBit(s ProcessorStatus, isSet bool) {
 	}
 }
 
+func setBits(value byte, mask byte, set bool) byte {
+	if set {
+		return value | mask
+	}
+	return value & (0xff ^ mask)
+}
+
 func (m MOS6502) getByteFromMemory(addr uint16, lockToCycle bool) byte {
 	if lockToCycle {
 		m.CycleLock.EnterCycle()

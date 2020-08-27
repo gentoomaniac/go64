@@ -122,5 +122,10 @@ func TestMOS6502Registers(t *testing.T) {
 			MOS6502.setProcessorStatusBit(C, true)
 			g.Assert(MOS6502.p).Equal(uint8(0xff))
 		})
+
+		g.It("setting bit masks", func() {
+			g.Assert(setBits(byte(0x00), byte(0xff), true)).Equal(byte(0xff))
+			g.Assert(setBits(byte(0xff), byte(0xaa), false)).Equal(byte(0x55))
+		})
 	})
 }
