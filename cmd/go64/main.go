@@ -1,7 +1,10 @@
 package main
 
 import (
+	"time"
+
 	"github.com/alecthomas/kong"
+	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
 	"github.com/gentoomaniac/gocli"
@@ -38,7 +41,9 @@ func main() {
 		"builtBy": builtBy,
 		"date":    date,
 	})
+
 	logging.Setup(&cli.LoggingConfig)
+	zerolog.TimeFieldFormat = time.StampNano
 
 	switch ctx.Command() {
 	case "foo":

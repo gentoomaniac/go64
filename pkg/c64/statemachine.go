@@ -3,13 +3,13 @@ package c64
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"regexp"
 	"strings"
 	"time"
 
-	"github.com/gentoomaniac/go64/pkg/cyclelock"
+	"github.com/rs/zerolog/log"
 
+	"github.com/gentoomaniac/go64/pkg/cyclelock"
 	"github.com/gentoomaniac/go64/pkg/mpu"
 )
 
@@ -79,23 +79,20 @@ func (c *C64) updateMemoryBanks() {
 
 // Init initialises all components (loading roms, setting specific memory values etc)
 func (c *C64) Init(basicRom string, kernalRom string, characterRom string) {
-	log.SetFlags(log.Lmicroseconds)
-	log.SetFlags(log.Lshortfile)
-
 	var err error
 	c.BasicRom, err = ioutil.ReadFile(basicRom)
 	if err != nil {
-		log.Panic(err)
+		log.Panic().Err(err)
 	}
 
 	c.KernalRom, err = ioutil.ReadFile(kernalRom)
 	if err != nil {
-		log.Panic(err)
+		log.Panic().Err(err)
 	}
 
 	c.CharacterRom, err = ioutil.ReadFile(characterRom)
 	if err != nil {
-		log.Panic(err)
+		log.Panic().Err(err)
 	}
 
 	c.Memory[0x00] = 0xff
@@ -120,7 +117,7 @@ func (c *C64) Run() {
 	time.Sleep(100 * time.Millisecond)
 	cycle := 0
 	for true {
-		fmt.Printf("-- Cycle #%02d\n", cycle)
+		log.Debug().Int("cycle", cycle).Msg("")
 		c.mpuLock.Unlock()
 		c.mpuLock.WaitForLock()
 		cycle++
