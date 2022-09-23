@@ -179,7 +179,7 @@ func (m *MOS6502) SetY(value uint8) {
 	m.y = value
 }
 
-//DumpRegisters returns a string with the curremnt register states
+// DumpRegisters returns a string with the curremnt register states
 func (m MOS6502) DumpRegisters() string {
 	buffer := ""
 	buffer += fmt.Sprintf("PC: 0x%04x\tPCL: 0x%02x\tPCH: 0x%02x\n", m.pc, m.PCL(), m.PCH())
@@ -272,7 +272,7 @@ func (m *MOS6502) getNextCodeDWord() uint16 {
 func (m MOS6502) impliedAdressing(addr uint16) uint16 { return 0 }
 
 // addressing, supported by bit-shifting instructions, turns the "action" of the operation towards the accumulator.
-//ToDo:
+// ToDo:
 func (m MOS6502) accumulatorAdressing() uint8 { return m.a }
 
 func (m MOS6502) absoluteAdressing(addr uint16) uint16 { return addr }

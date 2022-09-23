@@ -12,7 +12,7 @@ const (
 	RandomTestCount int = 100
 )
 
-//TestMOS6502 tests the basic registers, and helpers
+// TestMOS6502 tests the basic registers, and helpers
 func TestMOS6502Registers(t *testing.T) {
 
 	rand.Seed(time.Now().UTC().UnixNano())
