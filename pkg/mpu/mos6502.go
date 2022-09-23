@@ -2,10 +2,11 @@ package mpu
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/gentoomaniac/go64/pkg/cyclelock"
 	"github.com/gentoomaniac/go64/pkg/memory"
+
+	"github.com/rs/zerolog/log"
 )
 
 type ProcessorStatus uint8
@@ -350,8 +351,6 @@ func checkForOverflow(vOld byte, vNew byte) bool {
 
 // Init initialises the MPU
 func (m *MOS6502) Init(cyclelock cyclelock.CycleLock) {
-	log.SetFlags(log.Lmicroseconds)
-	log.SetFlags(log.Lshortfile)
 	m.s = 0xff
 	m.CycleLock = cyclelock
 }
@@ -365,7 +364,7 @@ func (m *MOS6502) Run() {
 
 	for i := 0; i <= 0xffff; i++ {
 		m.getNextCodeByte()
-		//log.Printf("++ CycleCount: %d\n", m.cyckleLock.CycleCount())
+		log.Debug().Int("cycleCount", m.CycleLock.CycleCount()).Msg("")
 		m.CycleLock.ResetCycleCount()
 	}
 }
