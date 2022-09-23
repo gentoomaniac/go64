@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/franela/goblin"
+	"github.com/gentoomaniac/go64/pkg/memory"
 )
 
 // TestSTackFunctions tests the stack functions
@@ -16,7 +17,7 @@ func TestStackFunctions(t *testing.T) {
 	g := goblin.Goblin(t)
 	g.Describe("Stack", func() {
 		g.It("push decrements stackpointer and stores value", func() {
-			var blankMemory [0x10000]byte
+			var blankMemory memory.Memory
 
 			MOS6502 := &MOS6502{}
 			MOS6502.Memory = &blankMemory
@@ -30,7 +31,7 @@ func TestStackFunctions(t *testing.T) {
 		})
 
 		g.It("stack overflow behaves as expected", func() {
-			var blankMemory [0x10000]byte
+			var blankMemory memory.Memory
 
 			MOS6502 := &MOS6502{}
 			MOS6502.Memory = &blankMemory
@@ -44,7 +45,7 @@ func TestStackFunctions(t *testing.T) {
 		})
 
 		g.It("pop increments stackpointer and retrieves value", func() {
-			var blankMemory [0x10000]byte
+			var blankMemory memory.Memory
 
 			MOS6502 := &MOS6502{}
 			MOS6502.Memory = &blankMemory
@@ -58,7 +59,7 @@ func TestStackFunctions(t *testing.T) {
 		})
 
 		g.It("stack underflow behaves as expected", func() {
-			var blankMemory [0x10000]byte
+			var blankMemory memory.Memory
 
 			MOS6502 := &MOS6502{}
 			MOS6502.Memory = &blankMemory

@@ -6,20 +6,18 @@ import (
 	"strings"
 )
 
-type Memory struct {
-	buffer [0x10000]byte
-}
+type Memory [0x10000]byte
 
 func (m *Memory) Set(addr uint16, value byte) {
-	m.buffer[addr] = value
+	m[addr] = value
 }
 
 func (m Memory) Get(addr uint16) byte {
-	return m.buffer[addr]
+	return m[addr]
 }
 
 func (m *Memory) CopyTo(offset uint16, array []byte) {
-	copy(m.buffer[offset:offset+uint16(len(array))], array)
+	copy(m[offset:offset+uint16(len(array))], array)
 }
 
 // DumpMemory debug prints the memory in the given address range
@@ -31,11 +29,11 @@ func (m Memory) DumpMemory(start uint16, end uint16) string {
 
 	for index := int(startAddr); index < int(end); index += bytesPerRow {
 		hexStrings := make([]string, 0)
-		for _, value := range m.buffer[index : index+bytesPerRow] {
+		for _, value := range m[index : index+bytesPerRow] {
 			hexStrings = append(hexStrings, fmt.Sprintf("%02x", value))
 		}
 
-		asText := string(m.buffer[index : index+bytesPerRow])
+		asText := string(m[index : index+bytesPerRow])
 		reNonPrintabel := regexp.MustCompile("[^[:graph:] ]")
 		asText = reNonPrintabel.ReplaceAllString(asText, ".")
 

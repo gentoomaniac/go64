@@ -7,6 +7,7 @@ import (
 
 	"github.com/franela/goblin"
 	"github.com/gentoomaniac/go64/pkg/cyclelock"
+	"github.com/gentoomaniac/go64/pkg/memory"
 )
 
 func TestAdressingModes(t *testing.T) {
@@ -16,7 +17,7 @@ func TestAdressingModes(t *testing.T) {
 	g := goblin.Goblin(t)
 	g.Describe("Test Adressing Modes", func() {
 		g.It("resolves implied Adressing correctly", func() {
-			var blankMemory [0x10000]byte
+			var blankMemory memory.Memory
 
 			var lock cyclelock.CycleLock
 			lock = &cyclelock.AlwaysOpenLock{}
@@ -36,7 +37,7 @@ func TestAdressingModes(t *testing.T) {
 		})
 
 		g.It("resolves accumulator Adressing correctly", func() {
-			var blankMemory [0x10000]byte
+			var blankMemory memory.Memory
 
 			var lock cyclelock.CycleLock
 			lock = &cyclelock.AlwaysOpenLock{}
@@ -56,7 +57,7 @@ func TestAdressingModes(t *testing.T) {
 		})
 
 		g.It("resolves absolute Adressing correctly", func() {
-			var blankMemory [0x10000]byte
+			var blankMemory memory.Memory
 
 			var lock cyclelock.CycleLock
 			lock = &cyclelock.AlwaysOpenLock{}
@@ -76,7 +77,7 @@ func TestAdressingModes(t *testing.T) {
 		})
 
 		g.It("resolves indexed Adressing correctly", func() {
-			var blankMemory [0x10000]byte
+			var blankMemory memory.Memory
 
 			var lock cyclelock.CycleLock
 			lock = &cyclelock.AlwaysOpenLock{}
@@ -97,7 +98,7 @@ func TestAdressingModes(t *testing.T) {
 		})
 
 		g.It("resolves zeropage Adressing correctly", func() {
-			var blankMemory [0x10000]byte
+			var blankMemory memory.Memory
 
 			var lock cyclelock.CycleLock
 			lock = &cyclelock.AlwaysOpenLock{}
@@ -117,7 +118,7 @@ func TestAdressingModes(t *testing.T) {
 		})
 
 		g.It("resolves zeropage indexed Adressing correctly", func() {
-			var blankMemory [0x10000]byte
+			var blankMemory memory.Memory
 
 			var lock cyclelock.CycleLock
 			lock = &cyclelock.AlwaysOpenLock{}
@@ -138,7 +139,7 @@ func TestAdressingModes(t *testing.T) {
 		})
 
 		g.It("resolves relative Adressing correctly", func() {
-			var blankMemory [0x10000]byte
+			var blankMemory memory.Memory
 
 			var lock cyclelock.CycleLock
 			lock = &cyclelock.AlwaysOpenLock{}
@@ -159,7 +160,7 @@ func TestAdressingModes(t *testing.T) {
 		})
 
 		g.It("resolves absolute indirect Adressing correctly", func() {
-			var blankMemory [0x10000]byte
+			var blankMemory memory.Memory
 
 			var lock cyclelock.CycleLock
 			lock = &cyclelock.AlwaysOpenLock{}
@@ -183,7 +184,7 @@ func TestAdressingModes(t *testing.T) {
 		})
 
 		g.It("resolves indexed indirect Adressing correctly", func() {
-			var blankMemory [0x10000]byte
+			var blankMemory memory.Memory
 
 			var lock cyclelock.CycleLock
 			lock = &cyclelock.AlwaysOpenLock{}
@@ -209,7 +210,7 @@ func TestAdressingModes(t *testing.T) {
 		})
 
 		g.It("resolves indirect indexed Adressing without page boundary correctly", func() {
-			var blankMemory [0x10000]byte
+			var blankMemory memory.Memory
 
 			var lock cyclelock.CycleLock
 			lock = &cyclelock.AlwaysOpenLock{}

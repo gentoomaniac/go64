@@ -10,6 +10,7 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"github.com/gentoomaniac/go64/pkg/cyclelock"
+	"github.com/gentoomaniac/go64/pkg/memory"
 	"github.com/gentoomaniac/go64/pkg/mpu"
 )
 
@@ -31,7 +32,7 @@ type C64 struct {
 	CharacterRom []byte
 
 	// Memory represents the 64kB memory of the C64
-	Memory [int(MaxMemoryAddress) + 1]byte
+	Memory memory.Memory
 
 	// Mpu represents the MOS6502 of the C64
 	Mpu     mpu.MOS6502
@@ -71,7 +72,7 @@ func (c *C64) updateMemoryBanks() {
 		copy(c.Memory[0xe000:0xe000+len(c.KernalRom)], c.KernalRom)
 	}
 	if c.Memory[0x01]&CHAREN == 1 {
-		fmt.Println("ToDo: CHAREN is set, I/O should be mapped")
+		log.Warn().Msg("ToDo: CHAREN is set, I/O should be mapped")
 	} else {
 		copy(c.Memory[0xd000:0xd000+len(c.CharacterRom)], c.CharacterRom)
 	}

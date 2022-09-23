@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/gentoomaniac/go64/pkg/cyclelock"
+	"github.com/gentoomaniac/go64/pkg/memory"
 )
 
 type ProcessorStatus uint8
@@ -94,7 +95,7 @@ type MOS6502 struct {
 	having to use self-modifying code. */
 	y uint8
 
-	Memory *[0x10000]byte
+	Memory *memory.Memory
 
 	CycleLock cyclelock.CycleLock
 }

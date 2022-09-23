@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/franela/goblin"
+	"github.com/gentoomaniac/go64/pkg/memory"
 )
 
 const (
@@ -20,7 +21,7 @@ func TestMOS6502Registers(t *testing.T) {
 	g := goblin.Goblin(t)
 	g.Describe("Regsisters", func() {
 		g.It("PC", func() {
-			var blankMemory [0x10000]byte
+			var blankMemory memory.Memory
 
 			MOS6502 := &MOS6502{}
 			MOS6502.Memory = &blankMemory
@@ -41,7 +42,7 @@ func TestMOS6502Registers(t *testing.T) {
 		})
 
 		g.It("PCL", func() {
-			var blankMemory [0x10000]byte
+			var blankMemory memory.Memory
 			MOS6502 := &MOS6502{}
 			MOS6502.Memory = &blankMemory
 
@@ -64,7 +65,7 @@ func TestMOS6502Registers(t *testing.T) {
 		})
 
 		g.It("PCH", func() {
-			var blankMemory [0x10000]byte
+			var blankMemory memory.Memory
 			MOS6502 := &MOS6502{}
 			MOS6502.Memory = &blankMemory
 
@@ -90,7 +91,7 @@ func TestMOS6502Registers(t *testing.T) {
 		})
 
 		g.It("setting processor status bits", func() {
-			var blankMemory [0x10000]byte
+			var blankMemory memory.Memory
 
 			MOS6502 := &MOS6502{}
 			MOS6502.Memory = &blankMemory
