@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/gentoomaniac/go64/cyclelock"
+	"github.com/gentoomaniac/go64/pkg/cyclelock"
 )
 
 type ProcessorStatus uint8

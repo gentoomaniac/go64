@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/franela/goblin"
-	"github.com/gentoomaniac/go64/cyclelock"
+	"github.com/gentoomaniac/go64/pkg/cyclelock"
 )
 
 func TestAdressingModes(t *testing.T) {

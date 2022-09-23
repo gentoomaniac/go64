@@ -8,9 +8,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gentoomaniac/go64/cyclelock"
+	"github.com/gentoomaniac/go64/pkg/cyclelock"
 
-	"github.com/gentoomaniac/go64/mpu"
+	"github.com/gentoomaniac/go64/pkg/mpu"
 )
 
 const (
