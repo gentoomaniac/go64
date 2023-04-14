@@ -7,7 +7,7 @@ require (
 	github.com/franela/goblin v0.0.0-20211003143422-0a4f594942bf
 	github.com/gentoomaniac/gocli v0.0.0-20210503153723-bf433779ccf3
 	github.com/gentoomaniac/logging v0.0.2
-	github.com/rs/zerolog v1.28.0
+	github.com/rs/zerolog v1.29.1
 )
 
 require (
